@@ -154,3 +154,20 @@ t.test(data$mental_health_score ~ data$stress_cat, var.equal=TRUE)
 
 ## Box Plot
 plot(data$mental_health_score ~ data$stress_cat)
+
+##################### QUESTION1 #####################
+#a
+summary(data$sleep_quality)
+
+data$sleep_cat <- cut(
+  data$sleep_quality,
+  breaks = c(1, 3, 4, 5),
+  labels = c("Low", "Medium", "High"),
+  right = TRUE,
+  include.lowest = TRUE
+)
+
+summary(data$sleep_cat)
+
+#b
+
