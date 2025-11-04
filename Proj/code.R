@@ -155,7 +155,7 @@ t.test(data$mental_health_score ~ data$stress_cat, var.equal=TRUE)
 ## Box Plot
 plot(data$mental_health_score ~ data$stress_cat)
 
-##################### QUESTION1 #####################
+##################### QUESTION2 #####################
 #a
 summary(data$sleep_quality)
 
