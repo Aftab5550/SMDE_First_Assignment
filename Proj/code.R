@@ -1,8 +1,10 @@
 install.packages("DescTools")
 install.packages("lmtest")
+install.packages("agricolae")
 library(DescTools)
 library(car)
 library(lmtest)
+library(agricolae)
 
 ##################### QUESTION1 #####################
 #a
@@ -226,11 +228,65 @@ bptest(model1)
 leveneTest(phone_usage_hours ~ age_cat, data=data)
 #### Levene's Test: p-value = 0.9121, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
 
-#### Conclusion: All the 3 Assumptions are fulfilled for the First Model and we don't have evidence to reject the null hypothesis that is "the mean of phone_usage_hours is EQUAL for the 4 groups (Gen Z, Gen Y, Gen X and Baby Boomers)
+#### Conclusion: All the 3 Assumptions are fulfilled for the First Model and we don't have evidence to reject the null hypothesis that is "the mean of phone_usage_hours is EQUAL for the 4 groups (Gen Z, Gen Y, Gen X and Baby Boomers). We also confirmed its true by looking at the Boxplot that showed that they have the same mean
 
+## Second Model (phone_usage_hours ~ sleep_cat)
+model2 <- aov(phone_usage_hours ~ sleep_cat, data=data)
+summary(model2)
+## p-value < 2e-16, so we reject the null hypothesis, that means at least one group (Low, Medium or High) has a different mean from the rest 
 
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(model2, alternative ="two.sided")
+#### Durbin Watson: p-value = 0.8562, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
 
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(model2))
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable phone_usage_hours seems to follow a Normal Distribution
+qqnorm(residuals(model2))
+qqline(residuals(model2), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
 
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+bptest(model2)
+#### Breusch Pagan: p-value = 0.07419, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+leveneTest(phone_usage_hours ~ sleep_cat, data=data)
+#### Levene's Test: p-value = 0.3958, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
 
+#### All the 3 Assumptions are fulfilled for the Second Model
 
+### Post hoc tests
+#### First Test (Tukey's HSD)
+TukeyHSD(model2)
+#### From the results, we conclude that all 3 groups have statistically significant difference because (Firstly, 0 is not included in the confidence interval of 95%. And secondly, p-value for all of them is 0). We can also compare the results obtained, to what we saw in section b (Boxplot) and see that the results match: Low > Medium > High
+
+#### Second Test (Pairwise t-test)
+with(data,
+     {
+       pairwise.t.test(phone_usage_hours, sleep_cat, p.adj="none")
+     })
+#### We see the same results, the pairwise t-tests show that all 3 groups have statistically significant difference because all of the p-values are < 2e-16
+
+#### Second Test (Pairwise t-test, with Bonferroni Correction)
+with(data,
+     {
+       pairwise.t.test(phone_usage_hours, sleep_cat, p.adj="bonf")
+     })
+#### Even after applying the Bonferroni Correction (to reduce the Type I error), we obtain the same results as before (all of the p-values are < 2e-16)
+
+#### Third Test (LSD Test)
+LSD <- LSD.test(model2, "sleep_cat")
+LSD
+#### After applying the LSD, we observe that none of the 3 groups share any alphabet. That means that they are all significantly different and from the values, we see the same results: Low > Medium > High 
+
+#### Third Test (LSD Test, with Bonferroni Correction)
+LSD <- LSD.test(model2, "sleep_cat", p.adj = "bonferroni")
+LSD
+#### Even after applying the Bonferroni Correction (to reduce the Type I error), we obtain the same results as before: None of the 3 groups share any alphabet and Low > Medium > High
+
+#### Conclusion: All 3 groups have statistically significant different mean. So for the second model, we reject the null hypothesis and accept the alternative hypothesis of "mean_Low != mean_Medium != mean_High" (more in concrete "mean_Low > mean_Medium > mean_High")
+
+## Third Model (daily_screen_time_hours ~ age_cat)
+model3 <- aov(daily_screen_time_hours ~ age_cat, data=data)
+summary(model3)
 
