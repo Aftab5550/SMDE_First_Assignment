@@ -277,7 +277,7 @@ with(data,
 #### Third Test (LSD Test)
 LSD <- LSD.test(model2, "sleep_cat")
 LSD
-#### After applying the LSD, we observe that none of the 3 groups share any alphabet. That means that they are all significantly different and from the values, we see the same results: Low > Medium > High 
+#### After applying the LSD test, we observe that none of the 3 groups share any alphabet. That means that they are all significantly different and from the values, we see the same results: Low > Medium > High 
 
 #### Third Test (LSD Test, with Bonferroni Correction)
 LSD <- LSD.test(model2, "sleep_cat", p.adj = "bonferroni")
@@ -289,4 +289,62 @@ LSD
 ## Third Model (daily_screen_time_hours ~ age_cat)
 model3 <- aov(daily_screen_time_hours ~ age_cat, data=data)
 summary(model3)
+## p-value < 2e-16, so we reject the null hypothesis, that means at least one group (Gen Z, Gen Y, Gen X and Baby Boomers) has a different mean from the rest
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(model3, alternative ="two.sided")
+#### Durbin Watson: p-value = 0.3474, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(model3))
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable phone_usage_hours seems to follow a Normal Distribution
+qqnorm(residuals(model3))
+qqline(residuals(model3), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+bptest(model3)
+#### Breusch Pagan: p-value = 0.4146, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+leveneTest(daily_screen_time_hours ~ age_cat, data=data)
+#### Levene's Test: p-value = 0.4423, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+
+#### All the 3 Assumptions are fulfilled for the Third Model
+
+### Post hoc tests
+#### First Test (Tukey's HSD)
+TukeyHSD(model3)
+#### From the results, we conclude that Gen Z has a statistically significant different (higher) mean compared to all the other groups (Gen Y, Gen X, Baby Boomers) because (Firstly, 0 is not included in the confidence interval of 95%. And secondly, p-value for all of them is 0). This was already seen in section b when we saw the Boxplot.  
+#### And also Gen Y has a statistically significant different (higher) mean than Baby Boomers because (Firstly, 0 is not included in the confidence interval of 95%. And secondly, the p-value is below 0.05). This was not really visible in the Boxplot interpretation in section b 
+
+#### Second Test (Pairwise t-test)
+with(data,
+     {
+       pairwise.t.test(daily_screen_time_hours, age_cat, p.adj="none")
+     })
+#### The pairwise t-tests show that all groups have statistically significant different mean (because all of the p-values are < 0.05), except the pair Baby Boomers and Gen X (whose p-value is 0.3316)
+
+#### Second Test (Pairwise t-test, with Bonferroni Correction)
+with(data,
+     {
+       pairwise.t.test(daily_screen_time_hours, age_cat, p.adj="bonf")
+     })
+#### After applying the Bonferroni Correction (to reduce the Type I error), we obtain the same results as Tukey's HSD: 
+#### - Gen Z has a statistically significant different mean compared to all the other groups (Gen Y, Gen X, Baby Boomers) because all of the p-values are < 2e-16
+#### - Gen Y and Baby Boomers have statistically significant different means because the p-value = 0.011 (which is < 0.05)
+
+#### Third Test (LSD Test)
+LSD <- LSD.test(model3, "age_cat")
+LSD
+#### After applying the LSD test, we observe that Gen X and Baby Boomers have the same alphabet, meanwhile Gen Z and Gen Y have different alphabets than the rest. This means that Gen Z and Gen Y are significantly different from the rest (and from each other too because they have different alphabets). Meanwhile the difference of mean between Gen X and Baby Bloomers is not significant
+
+#### Third Test (LSD Test, with Bonferroni Correction)
+LSD <- LSD.test(model3, "age_cat", p.adj = "bonferroni")
+LSD
+#### After applying the Bonferroni Correction (to reduce the Type I error), we obtain the same results as Tukey's HSD:
+#### - First of all, Gen Z has a significantly different mean (higher) than the rest because it doesn't share the alphabet with any of the other groups
+#### - Secondly, Gen Y is significantly different (higher) from Baby Boomers
+
+#### Conclusion: Gen Z has a statistically significant different (higher) mean compared to all the other groups (Gen Y, Gen X, Baby Boomers). And Gen Y has a statistically significant different (higher) mean than Baby Boomers. 
+#### So for the third model, we reject the null hypothesis and accept the alternative hypothesis of "mean_GenZ != mean_GenY, mean_GenZ != mean_GenX, mean_GenZ != mean_BabyBoomers and mean_GenY != mean_BabyBoomers"
 
