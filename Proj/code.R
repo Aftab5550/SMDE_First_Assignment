@@ -1,6 +1,8 @@
 install.packages("DescTools")
+install.packages("lmtest")
 library(DescTools)
 library(car)
+library(lmtest)
 
 ##################### QUESTION1 #####################
 #a
@@ -189,3 +191,46 @@ Boxplot(data$phone_usage_hours ~ data$sleep_cat, id=FALSE, col=2:(nlevels(data$s
 ### We can observe that all the 3 groups (Low, Medium and High) have slightly different means: Low > Medium > High
 
 #c
+## Normality of quantitative variables
+### Histograms
+hist(data$phone_usage_hours)
+hist(data$daily_screen_time_hours)
+
+### Test of Normality
+shapiro.test(data$phone_usage_hours)
+shapiro.test(data$daily_screen_time_hours)
+
+### Both seem to follow a normal distribution, even though shapiro test rejects the null hypothesis
+
+## First Model (phone_usage_hours ~ age_cat)
+model1 <- aov(phone_usage_hours ~ age_cat, data=data)
+summary(model1)
+## p-value = 0.298, so we don't have evidence to reject the null hypothesis that is "the mean of phone_usage_hours is EQUAL for the 4 groups (Gen Z, Gen Y, Gen X and Baby Boomers)
+## As previously concluded by seeing the histogram, they have visually same mean
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(model1, alternative ="two.sided")
+#### Durbin Watson: p-value = 0.7039, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(model1))
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable phone_usage_hours seems to follow a Normal Distribution
+qqnorm(residuals(model1))
+qqline(residuals(model1), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+bptest(model1)
+#### Breusch Pagan: p-value = 0.8905, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+leveneTest(phone_usage_hours ~ age_cat, data=data)
+#### Levene's Test: p-value = 0.9121, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+
+#### Conclusion: All the 3 Assumptions are fulfilled for the First Model and we don't have evidence to reject the null hypothesis that is "the mean of phone_usage_hours is EQUAL for the 4 groups (Gen Z, Gen Y, Gen X and Baby Boomers)
+
+
+
+
+
+
+
