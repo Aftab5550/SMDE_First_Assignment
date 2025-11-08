@@ -1,5 +1,6 @@
 install.packages("DescTools")
 library(DescTools)
+library(car)
 
 ##################### QUESTION1 #####################
 #a
@@ -171,4 +172,20 @@ summary(data$sleep_cat)
 
 #b
 
+## “daily screen time hours”, “mental health score” and “phone usage” for each age generation groups
+Boxplot(data$daily_screen_time_hours ~ data$age_cat, id=FALSE, col=2:(nlevels(data$age_cat)+1))
+### We can observe that the mean for Gen Y, Gen X and Baby Boomers is visually equal, but the mean for Gen Z is different (slightly higher than the others)
+Boxplot(data$mental_health_score ~ data$age_cat, id=FALSE, col=2:(nlevels(data$age_cat)+1))
+### We can observe that the mean for Gen Y, Gen X and Baby Boomers is approximately equal, but the mean for Gen Z is different (lower than the others)
+Boxplot(data$phone_usage_hours ~ data$age_cat, id=FALSE, col=2:(nlevels(data$age_cat)+1))
+### We can observe that the mean for Gen Z, Gen Y, Gen X and Baby Boomers is visually equal. 
 
+## “daily screen time hours”, “mental health score” and “phone usage” for each sleep quality categories
+Boxplot(data$daily_screen_time_hours ~ data$sleep_cat, id=FALSE, col=2:(nlevels(data$sleep_cat)+1))
+### We can observe that all the 3 groups (Low, Medium and High) have different means: Low > Medium > High
+Boxplot(data$mental_health_score ~ data$sleep_cat, id=FALSE, col=2:(nlevels(data$sleep_cat)+1))
+### We can observe that all the 3 groups (Low, Medium and High) have different means: Low < Medium < High
+Boxplot(data$phone_usage_hours ~ data$sleep_cat, id=FALSE, col=2:(nlevels(data$sleep_cat)+1))
+### We can observe that all the 3 groups (Low, Medium and High) have slightly different means: Low > Medium > High
+
+#c
