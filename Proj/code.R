@@ -437,4 +437,46 @@ leveneTest(daily_screen_time_hours_sqrt ~ sleep_cat, data=data)
 #### Assumptions 1 and 2 are fulfilled, but Assumption 3 is not fulfilled (Should do something?)
 ################################################################################################
 
+#### ........................................................ ####
+
+#d
+## Fifth Model (daily_screen_time_hours ~ sleep_cat*age_cat)
+model5 <- aov(daily_screen_time_hours ~ sleep_cat*age_cat, data=data)
+summary(model5)
+## These findings suggest that while both age and sleep quality independently influence daily screen time, their combined effect does not differ significantly across groups. Because p-value for both sleep_cat and age_cat is < 2e-16, but for the combined effect the p-value = 0.843
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(model5, alternative ="two.sided")
+#### Durbin Watson: p-value = 0.7153, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(model5))
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable daily_screen_time_hours seems to follow a Normal Distribution
+qqnorm(residuals(model5))
+qqline(residuals(model5), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+bptest(model5)
+#### Breusch Pagan: p-value = 0.05687, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+leveneTest(daily_screen_time_hours ~ sleep_cat*age_cat, data=data)
+#### Levene's Test: p-value = 0.2265, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+
+#### All the 3 Assumptions are fulfilled for the Third Model
+
+### Post hoc tests
+
+#### ........................................................ ####
+
+#### Interaction plot
+interaction.plot(data$sleep_cat, data$age_cat, data$daily_screen_time_hours, fun=mean, type="l", legend=TRUE, col = 1:4)
+#### Conclusion: The interaction of the two term is not significant 
+
+
+
+
+
+
+
 
