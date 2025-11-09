@@ -298,7 +298,7 @@ dwtest(model3, alternative ="two.sided")
 
 #### Assumption 2 (The populations from which the samples are selected must be normal)
 shapiro.test(residuals(model3))
-#### We have already seen the shapiro test rejects the null hypothesis even though the variable phone_usage_hours seems to follow a Normal Distribution
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable daily_screen_time_hours seems to follow a Normal Distribution
 qqnorm(residuals(model3))
 qqline(residuals(model3), col="red")
 #### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
@@ -347,4 +347,94 @@ LSD
 
 #### Conclusion: Gen Z has a statistically significant different (higher) mean compared to all the other groups (Gen Y, Gen X, Baby Boomers). And Gen Y has a statistically significant different (higher) mean than Baby Boomers. 
 #### So for the third model, we reject the null hypothesis and accept the alternative hypothesis of "mean_GenZ != mean_GenY, mean_GenZ != mean_GenX, mean_GenZ != mean_BabyBoomers and mean_GenY != mean_BabyBoomers"
+
+## Fourth Model (daily_screen_time_hours ~ sleep_cat)
+model4 <- aov(daily_screen_time_hours ~ sleep_cat, data=data)
+summary(model4)
+## p-value < 2e-16, so we reject the null hypothesis, that means at least one group (Low, Medium or High) has a different mean from the rest
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(model4, alternative ="two.sided")
+#### Durbin Watson: p-value = 0.7082, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(model4))
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable daily_screen_time_hours seems to follow a Normal Distribution
+qqnorm(residuals(model4))
+qqline(residuals(model4), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+bptest(model4)
+#### Breusch Pagan: p-value = 1.81e-05, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+leveneTest(daily_screen_time_hours ~ sleep_cat, data=data)
+#### Levene's Test: p-value = 0.0009863, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+
+################################################################################################
+#### Assumptions 1 and 2 are fulfilled, but Assumption 3 is not fulfilled (Should do something?)
+################################################################################################
+
+#### We apply log tranformation of the variable to see if we can resolve this issue 
+data$daily_screen_time_hours_log <- log(data$daily_screen_time_hours)
+summary(data$daily_screen_time_hours_log)
+hist(data$daily_screen_time_hours_log)
+
+model4_log <- aov(daily_screen_time_hours_log ~ sleep_cat, data=data)
+summary(model4_log)
+## p-value < 2e-16, so we reject the null hypothesis, that means at least one group (Low, Medium or High) has a different mean from the rest
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(model4_log, alternative ="two.sided")
+#### Durbin Watson: p-value = 0.5661, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(model4_log))
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable daily_screen_time_hours_log seems to follow a Normal Distribution
+qqnorm(residuals(model4_log))
+qqline(residuals(model4_log), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+bptest(model4_log)
+#### Breusch Pagan: p-value < 2.2e-16, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+leveneTest(daily_screen_time_hours_log ~ sleep_cat, data=data)
+#### Levene's Test: p-value < 2.2e-16, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+
+################################################################################################
+#### Assumptions 1 and 2 are fulfilled, but Assumption 3 is not fulfilled (Should do something?)
+################################################################################################
+
+#### We apply sqrt tranformation of the variable to see if we can resolve this issue 
+data$daily_screen_time_hours_sqrt <- sqrt(data$daily_screen_time_hours)
+summary(data$daily_screen_time_hours_sqrt)
+hist(data$daily_screen_time_hours_sqrt)
+
+model4_sqrt <- aov(daily_screen_time_hours_sqrt ~ sleep_cat, data=data)
+summary(model4_sqrt)
+## p-value < 2e-16, so we reject the null hypothesis, that means at least one group (Low, Medium or High) has a different mean from the rest
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(model4_sqrt, alternative ="two.sided")
+#### Durbin Watson: p-value = 0.5905, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(model4_sqrt))
+#### We have already seen the shapiro test rejects the null hypothesis even though the variable daily_screen_time_hours_log seems to follow a Normal Distribution
+qqnorm(residuals(model4_sqrt))
+qqline(residuals(model4_sqrt), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+bptest(model4_sqrt)
+#### Breusch Pagan: p-value = 1.407e-09, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+leveneTest(daily_screen_time_hours_sqrt ~ sleep_cat, data=data)
+#### Levene's Test: p-value = 4.488e-10, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+
+################################################################################################
+#### Assumptions 1 and 2 are fulfilled, but Assumption 3 is not fulfilled (Should do something?)
+################################################################################################
+
 
