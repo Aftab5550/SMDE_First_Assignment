@@ -94,8 +94,8 @@ chisq.test(stress_age)
 
 #d
 numeric_vars <- data[sapply(data, is.numeric)]
-# Dropping the variables "user_id", "sleep_quality", "mood_rating" and "stress_level"
-numeric_vars <- numeric_vars[ , !(names(numeric_vars) %in% c("user_id", "sleep_quality", "mood_rating", "stress_level"))]
+# Dropping the variables "user_id", "sleep_quality" and "stress_level"
+numeric_vars <- numeric_vars[ , !(names(numeric_vars) %in% c("user_id", "sleep_quality", "stress_level"))]
 
 ## For each variable, we plot the histogram and apply Shapiro test
 for (var in names(numeric_vars)) {
@@ -115,6 +115,7 @@ for (var in names(numeric_vars)) {
 ## Histogram: "entertainment_hours" seems to follow a normal distribution/slightly right skewed; Shapiro: Rejects the null hypothesis (p-value = 1.144e-11)
 ## Histogram: "gaming_hours" seems to follow a normal distribution(*); Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "sleep_duration_hours" seems to follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value = 3.413e-09)
+## Histogram: "mood_rating" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "physical_activity_hours_per_week" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "mental_health_score" doesn't follow a normal distribution(*); Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "caffeine_intake_mg_per_day" seems to follow a normal distribution; Shapiro: No evidence to reject the null hypothesis (p-value = 0.1083)
@@ -451,9 +452,61 @@ interaction.plot(data$sleep_cat, data$age_cat, data$daily_screen_time_hours, fun
 
 ##################### QUESTION3 #####################
 #a
+predictors <- numeric_vars[, !(names(numeric_vars) %in% "mental_health_score")]
+## Remove 'mental_health_score' from numeric_vars
+for (var in names(predictors)) {
+  plot(predictors[[var]], numeric_vars$mental_health_score,
+       xlab = var,
+       ylab = "Mental Health Score",
+       main = paste("Mental Health Score vs", var))
+}
+## Visually see the relation between the mental_health_score and other variables
 
+cor(numeric_vars)[14,]
+correlations <- cor(numeric_vars, use = "complete.obs")
+mh_cor <- correlations["mental_health_score", ]
+mh_cor_sorted <- sort(mh_cor, decreasing = TRUE)
+mh_cor_sorted
+cor_table <- data.frame(
+  Variable = names(mh_cor_sorted),
+  Correlation = mh_cor_sorted
+)
+print(cor_table, row.names = FALSE)
+## The variable that is most correlated to mental_health_score is social_media_hours
+cor.test(data$social_media_hours, data$mental_health_score)
+plot(data$social_media_hours, data$mental_health_score)
+scatterplot(data$social_media_hours, data$mental_health_score, smooth = FALSE)
 
+## First Regression Model (mental_health_score ~ social_media_hours)
+reg1 <- lm(mental_health_score ~ social_media_hours, data=data) 
+summary(reg1)
+## We reject the null hypothesis because the p-value for social_media_hours is < 2e-16, i-e The slope is != 0
 
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(reg1, alternative = "two.sided")
+#### Durbin Watson: p-value = 0.5871, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
 
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(reg1))
+#### Shapiro Test: p-value = 0.2103, so we don't have evidence to reject the null hypothesis, i-e Assumption 2 fulfills
+qqnorm(residuals(reg1))
+qqline(residuals(reg1), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
 
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(reg1))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
+bptest(reg1)
+#### Breusch Pagan: p-value = 0.249, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+
+#### All the 3 Assumptions are fulfilled for the First Regression Model
+
+### Confidence interval for the response variable ###
+y1 <- predict(reg1, interval = "confidence")
+y1
+
+### Need to interpret ..............................................
+
+#b
 
