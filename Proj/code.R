@@ -432,6 +432,8 @@ qqline(residuals(model5), col="red")
 #### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
 
 #### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(model5))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
 bptest(model5)
 #### Breusch Pagan: p-value = 0.05687, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
 leveneTest(daily_screen_time_hours ~ sleep_cat*age_cat, data=data)
@@ -447,7 +449,8 @@ leveneTest(daily_screen_time_hours ~ sleep_cat*age_cat, data=data)
 interaction.plot(data$sleep_cat, data$age_cat, data$daily_screen_time_hours, fun=mean, type="l", legend=TRUE, col = 1:4)
 #### Conclusion: The interaction of the two term is not significant 
 
-
+##################### QUESTION3 #####################
+#a
 
 
 
