@@ -223,6 +223,8 @@ qqline(residuals(model1), col="red")
 #### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
 
 #### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(model1))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
 bptest(model1)
 #### Breusch Pagan: p-value = 0.8905, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
 leveneTest(phone_usage_hours ~ age_cat, data=data)
@@ -248,6 +250,8 @@ qqline(residuals(model2), col="red")
 #### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
 
 #### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(model2))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
 bptest(model2)
 #### Breusch Pagan: p-value = 0.07419, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
 leveneTest(phone_usage_hours ~ sleep_cat, data=data)
@@ -304,6 +308,8 @@ qqline(residuals(model3), col="red")
 #### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
 
 #### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(model3))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
 bptest(model3)
 #### Breusch Pagan: p-value = 0.4146, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
 leveneTest(daily_screen_time_hours ~ age_cat, data=data)
@@ -366,78 +372,46 @@ qqline(residuals(model4), col="red")
 #### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
 
 #### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(model4))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
 bptest(model4)
-#### Breusch Pagan: p-value = 1.81e-05, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+#### Breusch Pagan: p-value = 1.81e-05
 leveneTest(daily_screen_time_hours ~ sleep_cat, data=data)
-#### Levene's Test: p-value = 0.0009863, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+#### Levene's Test: p-value = 0.0009863
+#### Even though Breusch Pagan and Levene's Test give p-values < 0.05, visually the points are roughly scattered around the whole figure in a rectangular shape, i-e Assumption 3 is fulfills
 
-################################################################################################
-#### Assumptions 1 and 2 are fulfilled, but Assumption 3 is not fulfilled (Should do something?)
-################################################################################################
+#### All the 3 Assumptions are fulfilled for the Fourth Model
 
-#### We apply log tranformation of the variable to see if we can resolve this issue 
-data$daily_screen_time_hours_log <- log(data$daily_screen_time_hours)
-summary(data$daily_screen_time_hours_log)
-hist(data$daily_screen_time_hours_log)
+### Post hoc tests
+#### First Test (Tukey's HSD)
+TukeyHSD(model4)
+#### From the results, we conclude that all 3 groups have statistically significant difference because (Firstly, 0 is not included in the confidence interval of 95%. And secondly, p-value for all of them is 0). We can also compare the results obtained, to what we saw in section b (Boxplot) and see that the results match: Low > Medium > High
 
-model4_log <- aov(daily_screen_time_hours_log ~ sleep_cat, data=data)
-summary(model4_log)
-## p-value < 2e-16, so we reject the null hypothesis, that means at least one group (Low, Medium or High) has a different mean from the rest
+#### Second Test (Pairwise t-test)
+with(data,
+     {
+       pairwise.t.test(daily_screen_time_hours, sleep_cat, p.adj="none")
+     })
+#### We see the same results, the pairwise t-tests show that all 3 groups have statistically significant difference because all of the p-values are < 2e-16
 
-### Confirming Assumptions
-#### Assumption 1 (The observations within each sample must be independent)
-dwtest(model4_log, alternative ="two.sided")
-#### Durbin Watson: p-value = 0.5661, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+#### Second Test (Pairwise t-test, with Bonferroni Correction)
+with(data,
+     {
+       pairwise.t.test(daily_screen_time_hours, sleep_cat, p.adj="bonf")
+     })
+#### Even after applying the Bonferroni Correction (to reduce the Type I error), we obtain the same results as before (all of the p-values are < 2e-16)
 
-#### Assumption 2 (The populations from which the samples are selected must be normal)
-shapiro.test(residuals(model4_log))
-#### We have already seen the shapiro test rejects the null hypothesis even though the variable daily_screen_time_hours_log seems to follow a Normal Distribution
-qqnorm(residuals(model4_log))
-qqline(residuals(model4_log), col="red")
-#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+#### Third Test (LSD Test)
+LSD <- LSD.test(model4, "sleep_cat")
+LSD
+#### After applying the LSD test, we observe that none of the 3 groups share any alphabet. That means that they are all significantly different and from the values, we see the same results: Low > Medium > High 
 
-#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
-bptest(model4_log)
-#### Breusch Pagan: p-value < 2.2e-16, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
-leveneTest(daily_screen_time_hours_log ~ sleep_cat, data=data)
-#### Levene's Test: p-value < 2.2e-16, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
+#### Third Test (LSD Test, with Bonferroni Correction)
+LSD <- LSD.test(model4, "sleep_cat", p.adj = "bonferroni")
+LSD
+#### Even after applying the Bonferroni Correction (to reduce the Type I error), we obtain the same results as before: None of the 3 groups share any alphabet and Low > Medium > High
 
-################################################################################################
-#### Assumptions 1 and 2 are fulfilled, but Assumption 3 is not fulfilled (Should do something?)
-################################################################################################
-
-#### We apply sqrt tranformation of the variable to see if we can resolve this issue 
-data$daily_screen_time_hours_sqrt <- sqrt(data$daily_screen_time_hours)
-summary(data$daily_screen_time_hours_sqrt)
-hist(data$daily_screen_time_hours_sqrt)
-
-model4_sqrt <- aov(daily_screen_time_hours_sqrt ~ sleep_cat, data=data)
-summary(model4_sqrt)
-## p-value < 2e-16, so we reject the null hypothesis, that means at least one group (Low, Medium or High) has a different mean from the rest
-
-### Confirming Assumptions
-#### Assumption 1 (The observations within each sample must be independent)
-dwtest(model4_sqrt, alternative ="two.sided")
-#### Durbin Watson: p-value = 0.5905, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
-
-#### Assumption 2 (The populations from which the samples are selected must be normal)
-shapiro.test(residuals(model4_sqrt))
-#### We have already seen the shapiro test rejects the null hypothesis even though the variable daily_screen_time_hours_log seems to follow a Normal Distribution
-qqnorm(residuals(model4_sqrt))
-qqline(residuals(model4_sqrt), col="red")
-#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
-
-#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
-bptest(model4_sqrt)
-#### Breusch Pagan: p-value = 1.407e-09, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
-leveneTest(daily_screen_time_hours_sqrt ~ sleep_cat, data=data)
-#### Levene's Test: p-value = 4.488e-10, so we reject the null hypothesis. i-e the Assumption 3 is not fulfilled
-
-################################################################################################
-#### Assumptions 1 and 2 are fulfilled, but Assumption 3 is not fulfilled (Should do something?)
-################################################################################################
-
-#### ........................................................ ####
+#### Conclusion: All 3 groups have statistically significant different mean. So for the second model, we reject the null hypothesis and accept the alternative hypothesis of "mean_Low != mean_Medium != mean_High" (more in concrete "mean_Low > mean_Medium > mean_High")
 
 #d
 ## Fifth Model (daily_screen_time_hours ~ sleep_cat*age_cat)
