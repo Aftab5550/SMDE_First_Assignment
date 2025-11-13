@@ -509,4 +509,62 @@ y1
 ### Need to interpret ..............................................
 
 #b
+## Second Regression Model (mental_health_score ~ social_media_hours+mood_rating)
+reg2 <- lm(mental_health_score ~ social_media_hours+mood_rating, data=data) 
+summary(reg2)
+## We reject the null hypothesis because the p-values for social_media_hours and mood_rating are < 2e-16, i-e The slope is != 0
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(reg2, alternative = "two.sided")
+#### Durbin Watson: p-value = 0.6779, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(reg2))
+#### Shapiro Test: p-value = 0.3853, so we don't have evidence to reject the null hypothesis, i-e Assumption 2 fulfills
+qqnorm(residuals(reg2))
+qqline(residuals(reg2), col="red")
+#### Finally, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(reg2))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
+bptest(reg2)
+#### Breusch Pagan: p-value = 0.3319, so we don't have evidence to reject the null hypothesis. i-e the Assumption 3 fulfills
+
+#### Assumption 4 (Multicollinearity)
+vif(reg2)
+#### Both predictors, social_media_hours and mood_rating, showed high VIF values (~6.75), indicating substantial multicollinearity.
+#### This suggests that these variables are strongly correlated and may be explaining overlapping variance in mental health scores.
+
+#### Choose the next new most correlated variable
+## Third Regression Model (mental_health_score ~ social_media_hours+physical_activity_hours_per_week)
+reg3 <- lm(mental_health_score ~ social_media_hours+physical_activity_hours_per_week, data=data) 
+summary(reg3)
+## We reject the null hypothesis because the p-values for social_media_hours and physical_activity_hours_per_week are < 2e-16, i-e The slope is != 0
+
+### Confirming Assumptions
+#### Assumption 1 (The observations within each sample must be independent)
+dwtest(reg3, alternative = "two.sided")
+#### Durbin Watson: p-value = 0.7587, so we don't have evidence to reject the null hypothesis. i-e the Assumption 1 fulfills
+
+#### Assumption 2 (The populations from which the samples are selected must be normal)
+shapiro.test(residuals(reg3))
+#### Shapiro Test: p-value = 0.001868
+qqnorm(residuals(reg3))
+qqline(residuals(reg3), col="red")
+#### Finally, even though Shapiro test give us a p-value < 0.05, we apply Q-Q Plot and the residuals seem to be Normal, i-e Assumption 2 fulfills
+
+#### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
+plot(residuals(reg3))
+#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
+bptest(reg3)
+#### Breusch Pagan: p-value = 9.38e-05 (................... Transformacion?)
+
+#### Assumption 4 (Multicollinearity)
+vif(reg3)
+
+
+
+
 
