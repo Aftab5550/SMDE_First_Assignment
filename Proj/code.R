@@ -564,6 +564,26 @@ bptest(reg3)
 #### Assumption 4 (Multicollinearity)
 vif(reg3)
 
+#### All the 4 Assumptions are fulfilled for the Third Regression Model
+y3 <- predict(reg3, interval = "confidence")
+y3
+
+### Need to interpret ..............................................
+
+### Comparing regression models
+#### Using R_squared metrics
+summary(reg1)$adj.r.squared
+summary(reg3)$adj.r.squared
+#### reg3 has better R squared value 80.58%
+
+#### Using Anova
+anova(reg1, reg3)
+#### p-value < 2.2e-16, so we reject the null hypothesis (which is that Beta_physical_activity_hours_per_week == 0). This indicates that physical_activity_hours_per_week is an important predictor of mental_health_score beyond the effect of social_media_hours alone.
+
+#### Conclusion: We choose the Third model
+
+#c
+
 
 
 
