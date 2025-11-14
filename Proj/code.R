@@ -117,7 +117,7 @@ for (var in names(numeric_vars)) {
 ## Histogram: "sleep_duration_hours" seems to follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value = 3.413e-09)
 ## Histogram: "mood_rating" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "physical_activity_hours_per_week" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
-## Histogram: "mental_health_score" doesn't follow a normal distribution(*); Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
+## Histogram: "mental_health_score" seems to follow a normal distribution(*); Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "caffeine_intake_mg_per_day" seems to follow a normal distribution; Shapiro: No evidence to reject the null hypothesis (p-value = 0.1083)
 ## Histogram: "weekly_anxiety_score" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "weekly_depression_score" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
@@ -596,14 +596,91 @@ summary(reg3_age)
 ### The model explains 81% of the variation in mental health score
 ### The overall model is highly significant since p-values < 2e-16
 
-b0_GenZ = coefficients(reg3_age)[1]
-b0_GenY = coefficients(reg3_age)[1] + coefficients(reg3_age)[4]
-b0_GenX = coefficients(reg3_age)[1] + coefficients(reg3_age)[5]
-b0_BabyBoomers = coefficients(reg3_age)[1] + coefficients(reg3_age)[6]
+names(reg3_age)
+coefficients(reg3_age)
 
-plot(mental_health_score ~ social_media_hours+physical_activity_hours_per_week, data = data, col =  age_cat+1, pch = age_cat+1, cex = 1)
+cols <- c("red", "blue", "green", "yellow")
+names(cols) <- c("Gen Z", "Gen Y", "Gen X", "Baby Boomers")
 
+### Since we cannot plot a 3-variable regression in 2D, so we must choose one predictor for the x-axis
+#### Holding physical_activity_hours_per_week constant
+mean_PA <- mean(data$physical_activity_hours_per_week, na.rm = TRUE)
+b0_GenZ = coefficients(reg3_age)[1] + (coefficients(reg3_age)[3]*mean_PA) 
+b0_GenY = coefficients(reg3_age)[1] + coefficients(reg3_age)[4] + (coefficients(reg3_age)[3]*mean_PA)
+b0_GenX = coefficients(reg3_age)[1] + coefficients(reg3_age)[5] + (coefficients(reg3_age)[3]*mean_PA)
+b0_BabyBoomers = coefficients(reg3_age)[1] + coefficients(reg3_age)[6] + (coefficients(reg3_age)[3]*mean_PA)
+slope = coefficients(reg3_age)[2]
+#### Visual plot
+plot(mental_health_score ~ social_media_hours, 
+     data = data, 
+     col = cols[data$age_cat],
+     pch = 16)
+abline(b0_GenZ,  slope, col = "red",    lwd = 2)
+abline(b0_GenY,  slope, col = "blue",   lwd = 2)
+abline(b0_GenX,  slope, col = "green",  lwd = 2)
+abline(b0_BabyBoomers, slope, col = "yellow", lwd = 2)
+legend("bottomleft",
+       legend = c("Gen Z", "Gen Y", "Gen X", "Baby Boomers"),
+       col = cols,
+       lwd = 2)
 
+#### Holding social_media_hours constant
+mean_SM <- mean(data$social_media_hours, na.rm = TRUE)
+b0_GenZ = coefficients(reg3_age)[1] + (coefficients(reg3_age)[2]*mean_SM) 
+b0_GenY = coefficients(reg3_age)[1] + coefficients(reg3_age)[4] + (coefficients(reg3_age)[2]*mean_SM)
+b0_GenX = coefficients(reg3_age)[1] + coefficients(reg3_age)[5] + (coefficients(reg3_age)[2]*mean_SM)
+b0_BabyBoomers = coefficients(reg3_age)[1] + coefficients(reg3_age)[6] + (coefficients(reg3_age)[2]*mean_SM)
+slope = coefficients(reg3_age)[3]
+#### Visual plot
+plot(mental_health_score ~ physical_activity_hours_per_week, 
+     data = data, 
+     col = cols[data$age_cat],
+     pch = 16)
+abline(b0_GenZ,  slope, col = "red",    lwd = 2)
+abline(b0_GenY,  slope, col = "blue",   lwd = 2)
+abline(b0_GenX,  slope, col = "green",  lwd = 2)
+abline(b0_BabyBoomers, slope, col = "yellow", lwd = 2)
+legend("bottomright",
+       legend = c("Gen Z", "Gen Y", "Gen X", "Baby Boomers"),
+       col = cols,
+       lwd = 2)
+
+## stress_cat
+reg3_stress <- lm(mental_health_score ~ social_media_hours+physical_activity_hours_per_week+stress_cat, data=data) 
+summary(reg3_stress)
+### For every additional hour of social media, mental health decreases by 5.67 points, holding PA and stress constant.
+### For every extra hour of physical activity per week, mental health increases by 1.88 points, holding SM and stress constant.
+### High stress participants score 3.38 points lower on mental health than Low stress participants, controlling for SM and PA.
+### The model explains 81.03% of the variation in mental health score
+### The overall model is highly significant since p-values < 2e-16
+
+names(reg3_stress)
+coefficients(reg3_stress)
+
+### Since we cannot plot a 3-variable regression in 2D, so we must choose one predictor for the x-axis
+#### Holding physical_activity_hours_per_week constant
+b0_Low = coefficients(reg3_stress)[1] + (coefficients(reg3_stress)[3]*mean_PA)
+b0_High = coefficients(reg3_stress)[1] + coefficients(reg3_stress)[4] + (coefficients(reg3_stress)[3]*mean_PA)
+slope = coefficients(reg3_stress)[2]
+
+#### Visual plot
+plot(mental_health_score ~ social_media_hours, data = data, col = c("black", "red")[data$stress_cat], pch=16)
+abline(b0_Low, slope, col="black", lwd=2)
+abline(b0_High, slope, col="red", lwd=2)
+legend("topright", legend=c("Low Stress", "High Stress"), col=c("black","red"), lwd=2)
+
+#### Holding social_media_hours constant
+b0_Low = coefficients(reg3_stress)[1] + (coefficients(reg3_stress)[2]*mean_SM)
+b0_High = coefficients(reg3_stress)[1] + coefficients(reg3_stress)[4] + (coefficients(reg3_stress)[2]*mean_SM)
+slope = coefficients(reg3_stress)[3]
+
+#### Visual plot
+plot(mental_health_score ~ physical_activity_hours_per_week, data = data, col = c("black", "red")[data$stress_cat], pch=16)
+abline(b0_Low, slope, col="black", lwd=2)
+abline(b0_High, slope, col="red", lwd=2)
+legend("topright", legend=c("Low Stress", "High Stress"), col=c("black","red"), lwd=2)
+
+#d
 
 
 
