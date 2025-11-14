@@ -379,7 +379,7 @@ bptest(model4)
 #### Breusch Pagan: p-value = 1.81e-05
 leveneTest(daily_screen_time_hours ~ sleep_cat, data=data)
 #### Levene's Test: p-value = 0.0009863
-#### Even though Breusch Pagan and Levene's Test give p-values < 0.05, visually the points are roughly scattered around the whole figure in a rectangular shape, i-e Assumption 3 is fulfills
+#### Even though Breusch Pagan and Levene's Test give p-values < 0.05, visually the points are roughly scattered around the whole figure in a rectangular shape, i-e Assumption 3 fulfills
 
 #### All the 3 Assumptions are fulfilled for the Fourth Model
 
@@ -557,14 +557,16 @@ qqline(residuals(reg3), col="red")
 
 #### Assumption 3 (The populations from which the samples are selected must have equal variances (homogeneity of variance))
 plot(residuals(reg3))
-#### We don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
+#### Even though some extreme values can be observed, we don’t see any shape and the points are roughly scattered around the whole figure in a rectangular shape
 bptest(reg3)
-#### Breusch Pagan: p-value = 9.38e-05 (................... Transformacion?)
+#### Even though Breusch Pagan test's p-value = 9.38e-05, visually the points are roughly scattered around the whole figure in a rectangular shape, i-e Assumption 3 fulfills
 
 #### Assumption 4 (Multicollinearity)
 vif(reg3)
+#### The multicollinearity for both the variables is approximately 2 which is < 5, so we can assume no correlation between the variables, i-e Assumption 4 fulfills
 
 #### All the 4 Assumptions are fulfilled for the Third Regression Model
+
 y3 <- predict(reg3, interval = "confidence")
 y3
 
@@ -578,11 +580,29 @@ summary(reg3)$adj.r.squared
 
 #### Using Anova
 anova(reg1, reg3)
-#### p-value < 2.2e-16, so we reject the null hypothesis (which is that Beta_physical_activity_hours_per_week == 0). This indicates that physical_activity_hours_per_week is an important predictor of mental_health_score beyond the effect of social_media_hours alone.
+#### We obtain a lower value for RSS compared to the first model and p-value < 2.2e-16, so we reject the null hypothesis (which is that Beta_physical_activity_hours_per_week == 0). This indicates that physical_activity_hours_per_week is an important predictor of mental_health_score beyond the effect of social_media_hours alone.
 
-#### Conclusion: We choose the Third model
+#### Conclusion: We choose the Third model because multiple regression model provides a better fit and explains mental health score more accurately.
 
 #c
+## age_cat
+reg3_age <- lm(mental_health_score ~ social_media_hours+physical_activity_hours_per_week+age_cat, data=data) 
+summary(reg3_age)
+### For every 1 additional hour spent on social media per day, mental health score decreases by about 6.39 points, holding age group and physical activity constant
+### For every 1 hour increase in physical activity per week, mental health score increases by about 2.01 points, holding social media use and age group constant
+### Gen Y scores about 2.15 points higher than Gen Z, controlling for SM hours + PA
+### Gen X scores about 2.29 points higher than Gen Z
+### Baby Boomers score about 2.13 points higher than Gen Z
+### The model explains 81% of the variation in mental health score
+### The overall model is highly significant since p-values < 2e-16
+
+b0_GenZ = coefficients(reg3_age)[1]
+b0_GenY = coefficients(reg3_age)[1] + coefficients(reg3_age)[4]
+b0_GenX = coefficients(reg3_age)[1] + coefficients(reg3_age)[5]
+b0_BabyBoomers = coefficients(reg3_age)[1] + coefficients(reg3_age)[6]
+
+plot(mental_health_score ~ social_media_hours+physical_activity_hours_per_week, data = data, col =  age_cat+1, pch = age_cat+1, cex = 1)
+
 
 
 
