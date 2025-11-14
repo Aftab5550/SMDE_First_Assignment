@@ -728,3 +728,4 @@ RMSE_train1
 ### The final model including social media hours, physical activity, and stress level was validated using a train-test split (67% train, 33% test).
 ### The RMSE on the training set was 0.099, and on the test set was 0.139, indicating good predictive performance and minimal overfitting.
 ### Overall, the model is valid and generalizes well to unseen data.
+
