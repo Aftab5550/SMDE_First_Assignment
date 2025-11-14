@@ -681,6 +681,23 @@ abline(b0_High, slope, col="red", lwd=2)
 legend("topright", legend=c("Low Stress", "High Stress"), col=c("black","red"), lwd=2)
 
 #d
+## Comparing regression models
+### Using R_squared metrics
+summary(reg3)$adj.r.squared
+summary(reg3_age)$adj.r.squared
+summary(reg3_stress)$adj.r.squared
+### The simple model explained 80.6% of the variance (Adjusted R² = 0.8058). Adding age category increased adjusted R² slightly to 0.8100, but the differences between generations were small. Adding stress category increased adjusted R² to 0.8103
+
+## Using Anova
+anova(reg3, reg3_age)
+### Age significantly improves the model statistically, but the effect is small in practice
+anova(reg3, reg3_stress)
+### Stress significantly improves the model both statistically and practically, more so than age
+
+### Both factors improve the model statistically, but stress level has a larger effect
+
+#e
+
 
 
 
