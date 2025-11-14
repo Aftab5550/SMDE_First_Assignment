@@ -95,7 +95,7 @@ chisq.test(stress_age)
 #d
 numeric_vars <- data[sapply(data, is.numeric)]
 # Dropping the variables "user_id", "sleep_quality" and "stress_level"
-numeric_vars <- numeric_vars[ , !(names(numeric_vars) %in% c("user_id", "sleep_quality", "stress_level"))]
+numeric_vars <- numeric_vars[ , !(names(numeric_vars) %in% c("user_id"))]
 
 ## For each variable, we plot the histogram and apply Shapiro test
 for (var in names(numeric_vars)) {
