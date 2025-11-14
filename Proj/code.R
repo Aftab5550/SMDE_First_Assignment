@@ -697,8 +697,34 @@ anova(reg3, reg3_stress)
 ### Both factors improve the model statistically, but stress level has a larger effect
 
 #e
+## Final model (mental_health_score ~ social_media_hours+physical_activity_hours_per_week+stress_cat)
+set.seed(123)
 
+n <- nrow(data)
+train.sample1 <- sample(1:n, round(0.67*n))
+train.set1 <- data[train.sample1, ] 
+test.set1 <- data[-train.sample1, ] 
 
+train.model1 <- lm(mental_health_score ~ social_media_hours+physical_activity_hours_per_week+stress_cat, data = train.set1)
+summary(train.model1)
 
+yhat<-predict(train.model1, test.set1, interval="prediction")
+yhat
 
+y<-test.set1$mental_health_score
 
+error<-cbind(yhat[,1,drop=FALSE],y,(y-yhat[,1])^2)
+sqr_err<-error[,3]
+mse<-mean(sqr_err)
+
+### Root Mean Square Error ###
+RMSE1<-sqrt(mse/(nrow(test.set1)))
+RMSE1
+
+names(train.model1)
+RMSE_train1<- sqrt(mean((train.model1$residuals)^2)/nrow(train.set1))
+RMSE_train1
+
+### The final model including social media hours, physical activity, and stress level was validated using a train-test split (67% train, 33% test).
+### The RMSE on the training set was 0.099, and on the test set was 0.139, indicating good predictive performance and minimal overfitting.
+### Overall, the model is valid and generalizes well to unseen data.
