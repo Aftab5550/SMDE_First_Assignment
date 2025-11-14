@@ -115,7 +115,9 @@ for (var in names(numeric_vars)) {
 ## Histogram: "entertainment_hours" seems to follow a normal distribution/slightly right skewed; Shapiro: Rejects the null hypothesis (p-value = 1.144e-11)
 ## Histogram: "gaming_hours" seems to follow a normal distribution(*); Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "sleep_duration_hours" seems to follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value = 3.413e-09)
+## Histogram: "sleep_quality" seems to follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "mood_rating" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
+## Histogram: "stress_level" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "physical_activity_hours_per_week" doesn't follow a normal distribution; Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "mental_health_score" seems to follow a normal distribution(*); Shapiro: Rejects the null hypothesis (p-value < 2.2e-16)
 ## Histogram: "caffeine_intake_mg_per_day" seems to follow a normal distribution; Shapiro: No evidence to reject the null hypothesis (p-value = 0.1083)
@@ -506,7 +508,7 @@ bptest(reg1)
 y1 <- predict(reg1, interval = "confidence")
 y1
 
-### Need to interpret ..............................................
+### For every additional hour spent on social media per day, the mental health score decreases by approximately 9.38 points on average
 
 #b
 ## Second Regression Model (mental_health_score ~ social_media_hours+mood_rating)
@@ -570,7 +572,8 @@ vif(reg3)
 y3 <- predict(reg3, interval = "confidence")
 y3
 
-### Need to interpret ..............................................
+### For each additional hour spent on social media per day, the mental health score decreases by about 6.67 points, holding physical activity constant
+### For each additional hour of physical activity per week, the mental health score increases by about 2.02 points, holding social media constant
 
 ### Comparing regression models
 #### Using R_squared metrics
